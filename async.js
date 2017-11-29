@@ -15,11 +15,12 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             resolve([]);
         }
 
-        const queue = jobs.slice();
-        const results = new Map();
+        const results = [];
         let runningCount = 0;
+        let lastStartedIndex = -1;
 
-        function start(job) {
+        function start(index) {
+            const job = jobs[index];
             runningCount++;
 
             Promise.race([
@@ -33,21 +34,17 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                     runningCount--;
                     startNext();
                     if (runningCount === 0) {
-                        onComplete();
+                        resolve(results);
                     }
                 });
         }
 
         function startNext() {
-            const job = queue.shift();
-            if (!job) {
+            lastStartedIndex++;
+            if (lastStartedIndex >= jobs.length) {
                 return;
             }
-            start(job);
-        }
-
-        function onComplete() {
-            resolve(jobs.map(job => results[job]));
+            start(lastStartedIndex);
         }
 
         for (let i = 0; i < parallelNum; i++) {
