@@ -20,17 +20,16 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         let lastStartedIndex = -1;
 
         function start(index) {
-            const job = jobs[index];
             runningCount++;
 
             Promise.race([
-                job()
+                jobs[index]()
                     .catch(err => err),
                 delay(timeout)
                     .then(() => new Error('Promise timeout'))
             ])
                 .then(result => {
-                    results[job] = result;
+                    results[index] = result;
                     runningCount--;
                     startNext();
                     if (runningCount === 0) {
