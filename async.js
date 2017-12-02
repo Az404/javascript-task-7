@@ -13,6 +13,8 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     return new Promise((resolve) => {
         if (jobs.length === 0) {
             resolve([]);
+
+            return;
         }
 
         const results = [];
@@ -25,8 +27,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             Promise.race([
                 jobs[index]()
                     .catch(err => err),
-                delay(timeout)
-                    .then(() => new Error('Promise timeout'))
+                delay(timeout, new Error('Promise timeout'))
             ])
                 .then(result => {
                     results[index] = result;
@@ -52,8 +53,8 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     });
 }
 
-function delay(timeout) {
+function delay(timeout, result) {
     return new Promise((resolve) => {
-        setTimeout(resolve, timeout);
+        setTimeout(resolve, timeout, result);
     });
 }
